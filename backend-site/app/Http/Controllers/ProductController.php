@@ -34,21 +34,41 @@ class ProductController extends Controller
         $request->validate([
             'title'=>'required',
             'description'=>'required',
+            'price'=>'required',
             'image'=>'required|image'
         ]);
 
+      
+
         try{
+
+            $product = new Product;
+            $product->title = $request->title;
+            $product->description = $request->description;
+            $product->price = $request->price;
+            $product->active = $request->active;
+            $product->status =  0;
+            $product->sales_off =  '0';
+            $product->low_price =  '0';
+
             if($request->hasFile('image')){
                 $imageName = Str::random().'.'.$request->image->getClientOriginalExtension();
                 Storage::disk('public')->putFileAs('product/image', $request->image,$imageName);
+                
+                /*
                 Product::create($request->post()+['image'=>$imageName]);
+                */
+                $product->image =  $imageName;
 
-                return response()->json([
-                    'message'=>'Product Created Successfully!!'
-                ]);
-            }else {
-                Product::create($request->post());
+               
             }
+
+            $product->save();
+
+            return response()->json([
+                'message'=>'Product Created Successfully!!'
+            ]);
+
 
         }catch(\Exception $e){
             \Log::error($e->getMessage());
